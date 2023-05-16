@@ -101,3 +101,4 @@ When you fork this repository, make sure the check the following steps in order 
 - check that Github Actions are enabled (for the forked repository);
 - check that repo Settings->Actions->General->Workflow permissions setting is set to **Read and write permissions**;
 - change the NAMESPACE parameter in .github/workflows/build-and-push-images.yml to match the account where the forked repository is located;
+- generate new cosign keypair and configure SIGNING_SECRET and SIGNING_SECRET_PASSWORD in repository settings->Secretes and variables->Secrets
