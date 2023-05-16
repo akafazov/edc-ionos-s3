@@ -8,7 +8,6 @@ Please refer to the official [site](https://github.com/ionos-cloud/edc-ionos-s3)
 
 
 
-
 ## Based on the following
 
 - [https://github.com/eclipse-dataspaceconnector/DataSpaceConnector](https://github.com/eclipse-dataspaceconnector/DataSpaceConnector) - v0.0.1-milestone-8;
@@ -96,3 +95,9 @@ In order to see a working example, go to the [example](./example/README.md) fold
 ## Deploying to IONOS Kubernetes
 Check the [deployment readme](./deployment/README.md) to see how to deploy the Connector locally or to an external Kubernetes cluster.
 
+## Forking this repository
+
+When you fork this repository, make sure the check the following steps in order to have a working Actions Workflow which builds the package automatically:
+- check that Github Actions are enabled (for the forked repository);
+- check that repo Settings->Actions->General->Workflow permissions setting is set to **Read and write permissions**;
+- change the NAMESPACE parameter in .github/workflows/build-and-push-images.yml to match the account where the forked repository is located;
