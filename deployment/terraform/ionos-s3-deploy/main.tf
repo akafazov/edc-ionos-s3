@@ -16,13 +16,14 @@ variable "ids_webhook_address" {
   default = "http://localhost:8282"
 }
 
-variable "image_repository" {}
-variable "image_tag" {}
-
 variable "s3_access_key" {}
 variable "s3_secret_key" {}
 variable "s3_endpoint" {}
 variable "ionos_token" {}
+
+variable "vaultname" {
+  default = "vault"
+}
 
 locals {
   root_token = fileexists("../vault-init/vault-keys.json") ? "${jsondecode(file("../vault-init/vault-keys.json")).root_token}" : ""
@@ -39,7 +40,7 @@ resource "helm_release" "edc-ionos-s3" {
 
   set {
     name  = "edc.vault.hashicorp.token"
-    value = "${jsondecode(file("./vault-keys.json")).root_token}"
+    value = "${jsondecode(file("../vault-init/vault-keys.json")).root_token}"
   }
 
   values = [
@@ -48,7 +49,7 @@ resource "helm_release" "edc-ionos-s3" {
 
   set {
     name  = "edc.vault.hashicorp.url"
-    value = "http://vault:8200"
+    value = "http://${var.vaultname}:8200"
   }
 
   set {
@@ -69,16 +70,6 @@ resource "helm_release" "edc-ionos-s3" {
   set {
     name  = "ids.webhook.address"
     value = var.ids_webhook_address
-  }
-
-  set {
-    name  = "image.repository"
-    value = var.image_repository
-  }
-
-  set {
-    name  = "image.tag"
-    value = var.image_tag
   }
 
 }

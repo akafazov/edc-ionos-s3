@@ -31,17 +31,16 @@ These are the services that are deployed:
 
 Set environment variables
 
-**Note:** You will need docker image of the EDC Ionos S3 connector pushed to a repository. If you don't have one, you can build it following the instructions in the [readme](/connector/README.md).
-
-**Note:** To create the IONOS token please take a look at the following [documentation](/ionos_token.md).
+**Some notes:**  
+- You will need docker image of the EDC Ionos S3 connector pushed to a repository. If you don't have one, you can build it following the instructions in the [readme](/connector/README.md);
+- To create the IONOS token please take a look at the following [documentation](/ionos_token.md);
+- If you are deploying multiple EDC Connectors on the same Kubernetes cluster, make sure **TF_VAR_namespace** and **TF_VAR_vaultname** parameters are unique for each Connector.
 
 ```sh
 # Required configuration
-export TF_VAR_s3_namespace='edc-ionos-s3'
+export TF_VAR_namespace='edc-ionos-s3'
 export TF_VAR_kubeconfig='path to kubeconfig'
-
-export TF_VAR_image_repository='' # docker image repository e.g. example.cr.de-fra.ionos.com/edc-ionos-s3
-export TF_VAR_image_tag='' # docker image tag e.g. latest
+export TF_VAR_vaultname='vault'  # optional if only 1 connector per cluster
 
 export TF_VAR_s3_access_key='' # S3 access key
 export TF_VAR_s3_secret_key='' # S3 secret key
@@ -49,26 +48,35 @@ export TF_VAR_s3_endpoint='' # s3 endpoint (e.g. s3-eu-central-1.ionoscloud.com)
 export TF_VAR_ionos_token='' # IONOS Cloud token
 ```
 
+In case you want to configure this Connector without Hashicorp Vault, you need to also set the parameters below in the helm [values.yaml](deployment/helm/edc-ionos-s3/values.yaml):
+
+```yaml
+  ionos:
+    endpoint: <YOUR-S3-ENDPOINT>
+    accessKey: <YOUR-KEY>
+    secretKey: <YOUR-SECRET-KEY>
+    token: <IONOS-TOKEN>
+```
+
+They should be the same as the ones set in the environment variables. The **ionos.endpoint** is set to the default S3 location, but it can be changed to any other location.
+
+
+If you don't want the Connector to be externally accessible, you need to set the following parameters in the helm [values.yaml](deployment/helm/edc-ionos-s3/values.yaml):
+
+```yaml
+  service:
+    type: ClusterIP
+```
+
+This will allocate a public IP address to the Connector. You can then access it on the ports 8181, 8182, and 8282.
+
 ***
 
 ## Deploy
 
 All commands paths are relative to the current directory where this readme is located.
 
-### 1. Change the docker image, imagepullsecret and the edc configurations in the `values.yaml` file of the helm chart. The vault configurations will be set by the terraform script.
-```sh
-vim helm/edc-ionos-s3/values.yaml
-```
-
-### 2. Create ImagePullSecret
-Before executing the command replace ```<path to docker config json file>``` with real path.
-
-```sh
-kubectl create namespace edc-ionos-s3
-kubectl create secret -n edc-ionos-s3 generic regcred --from-file=.dockerconfigjson=<path to docker config json file> --type=kubernetes.io/dockerconfigjson
-```
-
-### 2. Install the EDC Ionos S3 services
+### 1. Install the EDC Ionos S3 services
 
 To install the services run the script ```deploy-services.sh``` in ```terraform``` directory.
 
@@ -77,5 +85,12 @@ cd terraform
 ./deploy-services.sh
 ```
 
-### 3. Vault keys
+### 2. Vault keys
 After the services are installed you will have ```vault-keys.json``` file containing the vault keys in ```terraform``` directory.
+
+### 3. Destroy the services
+
+```sh
+cd terraform
+./destroy-services.sh
+```
